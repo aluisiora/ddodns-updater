@@ -102,7 +102,7 @@ func (c *DigitalOceanDNS) request(method string, path string, body io.Reader) (*
 		return nil, err
 	}
 
-	req.Header.Set("Authorization", c.token)
+	req.Header.Set("Authorization", "Bearer "+c.token)
 	req.Header.Set("Content-Type", "application/json")
 	client := http.Client{}
 

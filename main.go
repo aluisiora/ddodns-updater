@@ -1,27 +1,53 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
-
-	"github.com/joho/godotenv"
+	"strings"
+	"time"
 )
 
-func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+func guessDomain(record string) string {
+	firstDot := strings.Index(record, ".")
+	if firstDot == -1 {
+		return record
 	}
 
-    token := os.Getenv("DO_TOKEN")
+	return record[firstDot+1:]
+}
 
-    if (token == "") {
-        log.Fatal("no token set")
-    }
+func main() {
+	token := os.Getenv("DO_TOKEN")
 
-    record := os.Getenv("DNS_RECORD")
+	if token == "" {
+		log.Fatal("no token set")
+	}
 
-    if (record == "") {
-        log.Fatal("no dns record set")
-    }
+	record := os.Getenv("DNS_RECORD")
+
+	if record == "" {
+		log.Fatal("no dns record set")
+	}
+
+	updater := Updater{
+		DigitalOceanDNS: NewDigitalOceanDNS(token),
+		Record:          record,
+		Domain:          guessDomain(record),
+		PublicIPFetchers: []PublicIPFetcher{
+			NewIpify(),
+			NewIpapi(),
+		},
+	}
+
+	for {
+		go func() {
+            log.Print("running updater")
+			err := updater.UpdatePublicIP()
+            if err != nil {
+                log.Print(fmt.Errorf("error updating public ip [%w]", err))
+            }
+		}()
+		time.Sleep(time.Minute * 3)
+	}
 }

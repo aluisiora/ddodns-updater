@@ -11,8 +11,8 @@ type Ipify struct {
 	baseURL string
 }
 
-func NewIpify() Ipify {
-	return Ipify{
+func NewIpify() *Ipify {
+	return &Ipify{
 		baseURL: "https://api.ipify.org",
 	}
 }
@@ -41,8 +41,8 @@ type Ipapi struct {
 	baseURL string
 }
 
-func NewIpapi() Ipapi {
-	return Ipapi{
+func NewIpapi() *Ipapi {
+	return &Ipapi{
 		baseURL: "https://ipapi.co",
 	}
 }
